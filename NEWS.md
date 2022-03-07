@@ -11,3 +11,6 @@ Initial data items released are:
 Datasets added:
 - Care home incidents dataset - classification dataset to predict care home incidents based on features collected via the care home. Aim is to predict failing care homes, over care homes that meet inspection
 - Pre-diabetes - regression model to predict time between pre diabetes and diabetes, based off patient features. 
+
+## 0.1.3 - Added long_waiters dataset
+Added the long waiters dataset for working with NHS inpatients. 
