@@ -15,7 +15,7 @@ A data frame with 5110 rows and 11 variables:
   \item{heart_disease}{binary flag to indicate whether patient has heart disease: 1 or no heart disease history: 0}
   \item{work_related_stress}{binary flag to indicate whether patient has history of work related stress}
   \item{urban_residence}{binary flag indicating whether patient lives in an urban area or not}
-  \item{avg_glucose_levels}{average blood glucose readings of the patient}
+  \item{avg_glucose_level}{average blood glucose readings of the patient}
   \item{bmi}{body mass index of the patient: \url{https://www.nhs.uk/live-well/healthy-weight/bmi-calculator/}}
   \item{smokes}{binary flag to indicate if the patient smokes - 1 for current smoker and 0 for smoking cessation}
 
