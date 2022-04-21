@@ -19,7 +19,4 @@
 #
 #' }
 #' @source Prepared and compiled by Gary Hutson \email{hutsons-hacks@outlook.com}, Apr-2022.
-#' @examples
-
-
 "stroke_classification"
