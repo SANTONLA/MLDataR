@@ -50,7 +50,7 @@ The package currently has three example datasets, and more are being added every
 - **Failing Care Home classification** - classification supervised machine learning dataset to predict a failing care home by selected Datix incidents
 - **Heart disease prediction** - supervised machine learning classification dataset to enable the prediction of heart disease using a number of key outcome features
 - **Long stayers prediction** - supervised machine learning classification dataset to enable the prediction of a patient staying in hospital longer than 7 days.
-- ** Stroke Classification** - supervised machine learning classification dataset to enable the prediction of a stroke in an unseen patient, using past observations in the training set.
+- **Stroke Classification** - supervised machine learning classification dataset to enable the prediction of a stroke in an unseen patient, using past observations in the training set.
 - **Thyroid disease prediction** - supervised machine learning classification dataset to allow for the prediction of thyroid disease utilising historic patient records
 
 ## Further developments
