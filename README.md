@@ -45,13 +45,13 @@ library(MLDataR)
 The package currently has three example datasets, and more are being added every week. The first three datasets contained in the package are:
 
 - **Counter Strike Global Offensive** - supervised machine learning regression and classification data set to predict score or match outcome. 
-- **Diabetes disease prediction** - supervised machine learning classification dataset to enable the prediction of diabetic patients
+- **Diabetes disease prediction** - supervised machine learning classification dataset to enable the prediction of diabetic patients. 
 - **Diabetes onset prediction** - supervised machine learning regression dataset to enable prediction of the age at which a pre-diabetic will develop diabetes 
-- **Failing Care Home classification** - classification supervised machine learning dataset to predict a failing care home by selected Datix incidents
-- **Heart disease prediction** - supervised machine learning classification dataset to enable the prediction of heart disease using a number of key outcome features
-- **Long stayers prediction** - supervised machine learning classification dataset to enable the prediction of a patient staying in hospital longer than 7 days.
+- **Failing Care Home classification** - classification supervised machine learning dataset to predict a failing care home by selected Datix incidents. UK Datix service. 
+- **Heart disease prediction** - supervised machine learning classification dataset to enable the prediction of heart disease using a number of key outcome features. Anonymised from the British Heart Foundation example records. 
+- **Long stayers prediction** - supervised machine learning classification dataset to enable the prediction of a patient staying in hospital longer than 7 days. Extracted from stranded patients extract and anonymised for training and research purposes. Nottingham University Hospitals. 
 - **Stroke Classification** - supervised machine learning classification dataset to enable the prediction of a stroke in an unseen patient, using past observations in the training set.
-- **Thyroid disease prediction** - supervised machine learning classification dataset to allow for the prediction of thyroid disease utilising historic patient records
+- **Thyroid disease prediction** - supervised machine learning classification dataset to allow for the prediction of thyroid disease utilising historic patient records. Garvin Institute - see references in markdown files supporting package. 
 
 ## Further developments
 
