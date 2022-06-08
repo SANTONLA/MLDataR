@@ -1,0 +1,84 @@
+# install.packages("MLDataR")
+
+install.packages("MLDataR",dependencies=TRUE)
+install.packages("ggplot2", method="libcurl")
+
+
+library(MLDataR)
+library(dplyr)
+library(tidyr)
+library(tidymodels)
+library(data.table)
+library(ConfusionTableR)
+library(OddsPlotty)
+library(ggplot2)
+
+
+glimpse(MLDataR::heartdisease)
+
+
+##There are a couple of things we want to clean up. Notice that our outcome variable HeartDisease loads as a double variable. We want to convert it into a factor variable for our machine learning model.
+hd <- heartdisease %>%
+  mutate(across(where(is.character), as.factor),
+         HeartDisease = as.factor(HeartDisease)) %>% 
+  # Remove any non complete cases
+  na.omit()
+is.factor(hd$HeartDisease)
+
+
+## For Machine Learning models, it is generally recommended to split your data into a training and testing set, or if you are using hyperparameter tuning and updating your model, a training / test and validation set. Other methods are available, such a K-Fold Cross Validation; however, we will stick to a basic training and testing split for the purposes of this walkthrough.
+## To do this, and to make sure that the results are repeatable, we will use the set.seed(123) value –
+## which essentially says when we are randomly splitting this data, make sure that the random pattern is the same as the walkthrough.,
+
+set.seed(123)
+split_prop <- 0.8
+testing_prop <- 1 - split_prop
+split <- rsample::initial_split(hd, prop = split_prop)
+training <- rsample::training(split)
+testing <- rsample::testing(split)
+.
+
+# Print a custom message to show the samples involved
+
+training_message <- function() {
+  message(
+    cat(
+      'The training set has: ',
+      nrow(training),
+      ' examples and the testing set has:',
+      nrow(testing),
+      '.\nThis split has ',
+      paste0(format(100 * split_prop), '%'),
+      ' in the training set and ',
+      paste0(format(100 * testing_prop), '%'),
+      ' in the testing set.',
+      sep = ''
+    )
+  )
+}
+
+#view de output
+
+training_message()
+
+#We can fit a parsnip model to the training set and then we can evaluate the performance
+#como no he podido instalar ggplot2, vo a intentar hacerlo desde alguna versión anterior. Para ello, necesito cargar el paquete remotes, ya
+#que voy a emplear una función llamada install_version().en esta función hay que especificar el paquete y la versión.
+
+install.packages("remotes",dependencies=TRUE)
+library(remotes)
+
+
+install.packages("gtools", dependencies = TRUE)
+install.packages("parsnip", dependencies= TRUE)
+
+library("dplyr")
+library("ggplot2")
+library("tidymodels")
+library("parsnip")
+help.search("fit")
+help.search("ggplot2")
+y enlr_hd_fit <- logistic_reg() %>%
+  set_engine("glm") %>% 
+  set_mode("classification") %>% 
+  fit(HeartDisease ~ ., data = training)
