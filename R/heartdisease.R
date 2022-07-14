@@ -14,7 +14,7 @@ check.packages <- function(pkg){
     sapply(pkg, require, character.only = TRUE)
 }
 
-check.packages(c("knitr","ggplot2", "tidymodels", "MLDataR", "stringi", "dplyr", "tidyr","data.table","confuionTableR","Oddsplotty","RMarkdown","Kableextra","devtools"))
+check.packages(c("knitr","ggplot2", "tidymodels", "MLDataR", "stringi", "dplyr", "tidyr","data.table","ConfusionTableR","OddsPlotty","rmarkdown","kableExtra","devtools"))
 ```
 
 ## R Markdown
@@ -135,79 +135,40 @@ DFheartdisease %>%
 
 #Quitamos los valores NA's, convertimos a factores las variables sexo, resting_ecg y angina agrupamos la variable de destino en dos niveles, eliminamos y reordenamos variables.
 
-
-
-
 ```{r}
-DFheartdisease_CLEAN <- DFheartdisease %>% 
-  drop_na()%>%
-        transmute_at(DFheartdisease,c("Edad",
-           "Sexo",
-           "Presion_descanso",
-           "Colesterol",
-           "Fasting_BS",
-           "Resting_ECG",
-           "MAxHR",
-           "Angina",
-           "HeartPeakREading",
-           "HeartDisease"), as_factor)
+DFheartdisease1<- DFheartdisease %>%
+  mutate(across(where(is.character), as.factor),
+         Sexo = as.factor(Sexo)) %>% 
+  # Remove any non complete cases
+  na.omit()
+is.factor(DFheartdisease$Sexo)
 ```
-
+#lo mismo para Angina
+# Comprobar que la variable Angina ahora es un factor
 
 ```{r}
-select("Edad",
-           "Sexo",
-           "Presion_descanso",
-           "Colesterol",
-           "Fasting_BS",
-           "Resting_ECG",
-           "MAxHR",
-           "Angina",
-           "HeartPeakREading",
-           "HeartDisease")
 
+is.factor(DFheartdisease$Angina)
+```
+#Comprobar que la variable Resting_ECG es un factor
+
+```{r}
+
+is.factor(DFheartdisease$Resting_ECG)
+```
 #Glimpse data
-heart_dataset_clean_tbl %>%
-  glimpse()
-## Observations: 301
-## Variables: 14
-## $ Age                      <dbl> 63, 67, 67, 37, 41, 56, 62, 57, 63, 5...
-## $ Resting_Blood_Pressure   <dbl> 145, 160, 120, 130, 130, 120, 140, 12...
-## $ Serum_Cholesterol        <dbl> 233, 286, 229, 250, 204, 236, 268, 35...
-## $ Max_Heart_Rate_Achieved  <dbl> 150, 108, 129, 187, 172, 178, 160, 16...
-## $ ST_Depression_Exercise   <dbl> 2.3, 1.5, 2.6, 3.5, 1.4, 0.8, 3.6, 0....
-## $ Num_Major_Vessels_Flouro <dbl> 2, 5, 4, 2, 2, 2, 4, 2, 3, 2, 2, 2, 3...
-## $ Sex                      <fct> 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1...
-## $ Chest_Pain_Type          <fct> 1, 4, 4, 3, 2, 2, 4, 4, 4, 4, 4, 2, 3...
-## $ Fasting_Blood_Sugar      <fct> 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1...
-## $ Resting_ECG              <fct> 2, 2, 2, 0, 2, 0, 2, 0, 2, 2, 0, 2, 2...
-## $ Exercise_Induced_Angina  <fct> 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1...
-## $ Peak_Exercise_ST_Segment <fct> 3, 2, 2, 3, 1, 1, 3, 1, 2, 3, 2, 2, 2...
-## $ Thalassemia              <fct> 6.0, 3.0, 7.0, 3.0, 3.0, 3.0, 3.0, 3....
-## $ Diagnosis_Heart_Disease  <fct> 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1...
-```
-
-```#glimse data
-```{r}
-hd_clean_tbl%>%
-  glimpse(hd_clean_tbl)
-```
-
 
 ```{r}
+
+  glimpse(DFheartdisease)
 ```
 
 ## También se pueden incluir gráficos:
 ```{r}
 
-plot(DFheartdisease$Sexo)
+plot(DFheartdisease$Sexo,echo=FALSE)
 
 ```
-
-
-```{r}
-```{r pressure, echo=FALSE}
-
-```
+``
 
 Nota: El parámetro`echo = FALSE` se añadió para evitar imprimir el código generado con el gráfico.
