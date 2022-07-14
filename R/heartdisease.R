@@ -21,7 +21,7 @@ check.packages(c("knitr","ggplot2", "tidymodels", "MLDataR", "stringi", "dplyr",
 
 Esto es un documento de Markdown. Markdown es una sintáxis de formato simple para crear documentosHTML, PDF, and MS Word documents. PAra más detalles consulte <http://rmarkdown.rstudio.com>.
 
-Cuando haces click en el botón **Knit** se generará un documento que incluye tanto  includes el contendio como la salida de cualquier fragmento de código R incrustado dentro del documento.
+Cuando haces click en el botón **Knit** se generará un documento que incluye tanto el contenido como la salida de cualquier fragmento de código R incrustado dentro del documento.
 #Leemos los datos
 ```{r}
 data("heartdisease")
