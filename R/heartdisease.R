@@ -156,11 +156,23 @@ is.factor(DFheartdisease$Angina)
 
 is.factor(DFheartdisease$Resting_ECG)
 ```
+#Comprobar que la variable heartdisease es un factor
+
+```{r}
+
+DFheartdisease2<- DFheartdisease %>%
+  mutate(across(where(is.character), as.factor),
+        HeartDisease =as.factor(HeartDisease)) %>% 
+  # Remove any non complete cases
+  na.omit()
+is.factor(DFheartdisease2$HeartDisease)
+```
+
 #Glimpse data
 
 ```{r}
 
-  glimpse(DFheartdisease)
+  glimpse(DFheartdisease2)
 ```
 
 ## También se pueden incluir gráficos:
@@ -172,3 +184,196 @@ plot(DFheartdisease$Sexo,echo=FALSE)
 ``
 
 Nota: El parámetro`echo = FALSE` se añadió para evitar imprimir el código generado con el gráfico.
+
+
+Para los modelos de machine learning, se recomienda dividir los datos entre datos de entrenamiento y test. También se puede utilizar otros métodos como el "K-Fold Cross Validation"; de todos modos, para este ejercicio seguiremos con el método de división tradicional.
+
+Para conseguir esto, y asegurarnos de que los resultados son repetibles, utilizaremos "set.seed(123) value" – que esencialmente nos dice que estamos dividiendo los datos de manera aleatoria, y nos aseguramos de que el patrón aleatorio es el mismo que el tutorial, es decir que da la misma división que esta publicación.
+
+
+```{r}
+set.seed(123)
+split_prop <- 0.8
+testing_prop <- 1 - split_prop
+split <- rsample::initial_split(hd, prop = split_prop)
+training <- rsample::training(split)
+testing <- rsample::testing(split)
+# Print a custom message to show the samples involved
+training_message <- function() {
+  message(
+    cat(
+      'The training set has: ',
+      nrow(training),
+      ' examples and the testing set has:',
+      nrow(testing),
+      '.\nThis split has ',
+      paste0(format(100 * split_prop), '%'),
+      ' in the training set and ',
+      paste0(format(100 * testing_prop), '%'),
+      ' in the testing set.',
+      sep = ''
+    )
+  )
+}
+training_message()
+## The training set has: 734 examples and the testing set has:184.
+## This split has 80% in the training set and 20% in the testing set.
+## 
+```
+Podemos ajustar un modelo de parsnip al conjunto de entrenamiento y luego podemos evaluar el rendimiento.
+```{r}
+lr_hd_fit <- logistic_reg() %>%
+  set_engine("glm") %>% 
+  set_mode("classification") %>% 
+  fit(DFheartdisease2$HeartDisease ~ ., data = training)
+```
+
+Si queremos ver los resultados resumidos de nuestro modelo de forma ordenada (es decir, un marco de datos con nombres de columna estándar), podemos usar la función tidy():
+
+```{r}
+tidy(lr_hd_fit)
+
+```
+
+
+#seleccionar variables categóricas, recodificarlas a sus valores, convertirlas en formato largo
+
+```{r}
+HDgrantabla <-DFheartdisease  %>%
+  select(Sexo,
+         Resting_ECG,
+         Angina) %>%
+  mutate(Sexo = recode_factor(Sex, `0` = "female", 
+                                  `1` = "male" ),
+         Resting_ECG = recode_factor(Resting_ECG,
+         `0` = "normal",
+         `1`="ST-Tabnormality",
+         `2`="LVhypertrophy"),
+        Angina=recode_factor(Angina,
+        `N`="NO",
+        `Y`="Yes")
+gather(key = "key", value = "value", -Diagnosis_Heart_Disease)
+```
+
+#Visualize with bar plot
+hd_long_fact_tbl %>% 
+  ggplot(aes(value)) +
+    geom_bar(aes(x        = value, 
+                 fill     = Diagnosis_Heart_Disease), 
+                 alpha    = .6, 
+                 position = "dodge", 
+                 color    = "black",
+                 width    = .8
+             ) +
+    labs(x = "",
+         y = "",
+         title = "Scaled Effect of Categorical Variables") +
+    theme(
+         axis.text.y  = element_blank(),
+         axis.ticks.y = element_blank()) +
+    facet_wrap(~ key, scales = "free", nrow = 4) +
+    scale_fill_manual(
+         values = c("#fde725ff", "#20a486ff"),
+         name   = "Heart\nDisease",
+         labels = c("No HD", "Yes HD"))  %>%
+  select(Sex,
+         Chest_Pain_Type,
+         Fasting_Blood_Sugar,
+         Resting_ECG,
+         Exercise_Induced_Angina,
+         Peak_Exercise_ST_Segment,
+         Thalassemia,
+         Diagnosis_Heart_Disease) %>%
+  mutate(Sex = recode_factor(Sex, `0` = "female", 
+                                  `1` = "male" ),
+         Chest_Pain_Type = recode_factor(Chest_Pain_Type, `1` = "typical",   
+                                                          `2` = "atypical",
+                                                          `3` = "non-angina", 
+                                                          `4` = "asymptomatic"),
+         Fasting_Blood_Sugar = recode_factor(Fasting_Blood_Sugar, `0` = "<= 120 mg/dl", 
+                                                                  `1` = "> 120 mg/dl"),
+         Resting_ECG = recode_factor(Resting_ECG, `0` = "normal",
+                                                  `1` = "ST-T abnormality",
+                                                  `2` = "LV hypertrophy"),
+         Exercise_Induced_Angina = recode_factor(Exercise_Induced_Angina, `0` = "no",
+                                                                          `1` = "yes"),
+         Peak_Exercise_ST_Segment = recode_factor(Peak_Exercise_ST_Segment, `1` = "up-sloaping",
+                                                                            `2` = "flat",
+                                                                            `3` = "down-sloaping"),
+         Thalassemia = recode_factor(Thalassemia, `3` = "normal",
+                                                  `6` = "fixed defect",
+                                                  `7` = "reversible defect")) %>%
+  gather(key = "key", value = "value", -Diagnosis_Heart_Disease)
+
+#Visualize with bar plot
+hd_long_fact_tbl %>% 
+  ggplot(aes(value)) +
+    geom_bar(aes(x        = value, 
+                 fill     = Diagnosis_Heart_Disease), 
+                 alpha    = .6, 
+                 position = "dodge", 
+                 color    = "black",
+                 width    = .8
+             ) +
+    labs(x = "",
+         y = "",
+         title = "Scaled Effect of Categorical Variables") +
+    theme(
+         axis.text.y  = element_blank(),
+         axis.ticks.y = element_blank()) +
+    facet_wrap(~ key, scales = "free", nrow = 4) +
+    scale_fill_manual(
+         values = c("#fde725ff", "#20a486ff"),
+         name   = "Heart\nDisease",
+         labels = c("No HD", "Yes HD"))  %>%
+  select(Sex,
+         Chest_Pain_Type,
+         Fasting_Blood_Sugar,
+         Resting_ECG,
+         Exercise_Induced_Angina,
+         Peak_Exercise_ST_Segment,
+         Thalassemia,
+         Diagnosis_Heart_Disease) %>%
+  mutate(Sex = recode_factor(Sex, `0` = "female", 
+                                  `1` = "male" ),
+         Chest_Pain_Type = recode_factor(Chest_Pain_Type, `1` = "typical",   
+                                                          `2` = "atypical",
+                                                          `3` = "non-angina", 
+                                                          `4` = "asymptomatic"),
+         Fasting_Blood_Sugar = recode_factor(Fasting_Blood_Sugar, `0` = "<= 120 mg/dl", 
+                                                                  `1` = "> 120 mg/dl"),
+         Resting_ECG = recode_factor(Resting_ECG, `0` = "normal",
+                                                  `1` = "ST-T abnormality",
+                                                  `2` = "LV hypertrophy"),
+         Exercise_Induced_Angina = recode_factor(Exercise_Induced_Angina, `0` = "no",
+                                                                          `1` = "yes"),
+         Peak_Exercise_ST_Segment = recode_factor(Peak_Exercise_ST_Segment, `1` = "up-sloaping",
+                                                                            `2` = "flat",
+                                                                            `3` = "down-sloaping"),
+         Thalassemia = recode_factor(Thalassemia, `3` = "normal",
+                                                  `6` = "fixed defect",
+                                                  `7` = "reversible defect")) %>%
+  gather(key = "key", value = "value", -Diagnosis_Heart_Disease)
+
+#Visualize with bar plot
+hd_long_fact_tbl %>% 
+  ggplot(aes(value)) +
+    geom_bar(aes(x        = value, 
+                 fill     = Diagnosis_Heart_Disease), 
+                 alpha    = .6, 
+                 position = "dodge", 
+                 color    = "black",
+                 width    = .8
+             ) +
+    labs(x = "",
+         y = "",
+         title = "Scaled Effect of Categorical Variables") +
+    theme(
+         axis.text.y  = element_blank(),
+         axis.ticks.y = element_blank()) +
+    facet_wrap(~ key, scales = "free", nrow = 4) +
+    scale_fill_manual(
+         values = c("#fde725ff", "#20a486ff"),
+         name   = "Heart\nDisease",
+         labels = c("No HD", "Yes HD"))
+
