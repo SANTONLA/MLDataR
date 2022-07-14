@@ -1,4 +1,4 @@
-#---
+---
 Título: "Detección anomalías cardiacas"
 Autor: "Silvia Antón"
 Fecha: "`r Sys.Date()`"
@@ -21,7 +21,7 @@ check.packages(c("knitr","ggplot2", "tidymodels", "MLDataR", "stringi", "dplyr",
 
 Esto es un documento de Markdown. Markdown es una sintáxis de formato simple para crear documentosHTML, PDF, and MS Word documents. PAra más detalles consulte <http://rmarkdown.rstudio.com>.
 
-Cuando haces click en el botón **Knit** se generará un documento que incluye tanto el contenido como la salida de cualquier fragmento de código R incrustado dentro del documento.
+Cuando haces click en el botón **Knit** se generará un documento que incluye tanto  includes el contendio como la salida de cualquier fragmento de código R incrustado dentro del documento.
 #Leemos los datos
 ```{r}
 data("heartdisease")
@@ -72,3 +72,142 @@ colnames(DFheartdisease) <- names
 ```{r}
 DFheartdisease %>% glimpse()
 ```
+
+#Primer resumen de las caracteristicas del data set
+
+```{r}
+
+summary(DFheartdisease)
+
+
+
+```
+
+
+#Queremos ver el numero de casos en cada nivel de las variables
+``
+
+```{r}
+DFheartdisease %>% 
+  drop_na() %>%
+  group_by(HeartDisease) %>%
+  count() %>% 
+  ungroup() %>%
+  kable(align = rep("c", 2))
+```
+
+#variable sexo
+```{r}
+DFheartdisease %>% 
+  drop_na() %>%
+  group_by(Sexo) %>%
+  count() %>% 
+  ungroup() %>%
+  kable(align = rep("c", 2)) 
+```
+
+#variable resting ECG
+```{r}
+
+  DFheartdisease %>% 
+  drop_na() %>%
+  group_by(Resting_ECG) %>%
+  count() %>% 
+  ungroup() %>%
+  kable(align = rep("c", 2))
+
+```
+  
+#Variable Angina
+  
+ 
+```{r}
+  DFheartdisease %>% 
+    drop_na() %>%
+    group_by(Angina) %>%
+    count() %>% 
+    ungroup() %>%
+    kable(align = rep("c", 2))
+  
+```
+
+##Hay unas cuantas cosas que queremos limpiar. Las variables sexo, resting y angina, las queremos convertir en factor para nuestro modelo de machine learning.
+
+#Quitamos los valores NA's, convertimos a factores las variables sexo, resting_ecg y angina agrupamos la variable de destino en dos niveles, eliminamos y reordenamos variables.
+
+
+
+
+```{r}
+DFheartdisease_CLEAN <- DFheartdisease %>% 
+  drop_na()%>%
+        transmute_at(DFheartdisease,c("Edad",
+           "Sexo",
+           "Presion_descanso",
+           "Colesterol",
+           "Fasting_BS",
+           "Resting_ECG",
+           "MAxHR",
+           "Angina",
+           "HeartPeakREading",
+           "HeartDisease"), as_factor)
+```
+
+
+```{r}
+select("Edad",
+           "Sexo",
+           "Presion_descanso",
+           "Colesterol",
+           "Fasting_BS",
+           "Resting_ECG",
+           "MAxHR",
+           "Angina",
+           "HeartPeakREading",
+           "HeartDisease")
+
+#Glimpse data
+heart_dataset_clean_tbl %>%
+  glimpse()
+## Observations: 301
+## Variables: 14
+## $ Age                      <dbl> 63, 67, 67, 37, 41, 56, 62, 57, 63, 5...
+## $ Resting_Blood_Pressure   <dbl> 145, 160, 120, 130, 130, 120, 140, 12...
+## $ Serum_Cholesterol        <dbl> 233, 286, 229, 250, 204, 236, 268, 35...
+## $ Max_Heart_Rate_Achieved  <dbl> 150, 108, 129, 187, 172, 178, 160, 16...
+## $ ST_Depression_Exercise   <dbl> 2.3, 1.5, 2.6, 3.5, 1.4, 0.8, 3.6, 0....
+## $ Num_Major_Vessels_Flouro <dbl> 2, 5, 4, 2, 2, 2, 4, 2, 3, 2, 2, 2, 3...
+## $ Sex                      <fct> 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1...
+## $ Chest_Pain_Type          <fct> 1, 4, 4, 3, 2, 2, 4, 4, 4, 4, 4, 2, 3...
+## $ Fasting_Blood_Sugar      <fct> 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1...
+## $ Resting_ECG              <fct> 2, 2, 2, 0, 2, 0, 2, 0, 2, 2, 0, 2, 2...
+## $ Exercise_Induced_Angina  <fct> 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1...
+## $ Peak_Exercise_ST_Segment <fct> 3, 2, 2, 3, 1, 1, 3, 1, 2, 3, 2, 2, 2...
+## $ Thalassemia              <fct> 6.0, 3.0, 7.0, 3.0, 3.0, 3.0, 3.0, 3....
+## $ Diagnosis_Heart_Disease  <fct> 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1...
+```
+
+```#glimse data
+```{r}
+hd_clean_tbl%>%
+  glimpse(hd_clean_tbl)
+```
+
+
+```{r}
+```
+
+## También se pueden incluir gráficos:
+```{r}
+
+plot(DFheartdisease$Sexo)
+
+```
+
+
+```{r}
+```{r pressure, echo=FALSE}
+
+```
+
+Nota: El parámetro`echo = FALSE` se añadió para evitar imprimir el código generado con el gráfico.
