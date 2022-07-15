@@ -1,4 +1,4 @@
----
+----
 Título: "Detección anomalías cardiacas"
 Autor: "Silvia Antón"
 Fecha: "`r Sys.Date()`"
@@ -466,4 +466,3 @@ hd_long_fact_tbl %>%
          values = c("#fde725ff", "#20a486ff"),
          name   = "Heart\nDisease",
          labels = c("No HD", "Yes HD"))
-
