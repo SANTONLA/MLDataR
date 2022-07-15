@@ -14,7 +14,7 @@ check.packages <- function(pkg){
     sapply(pkg, require, character.only = TRUE)
 }
 
-check.packages(c("knitr","ggplot2", "tidymodels", "MLDataR", "stringi", "dplyr", "tidyr","data.table","ConfusionTableR","OddsPlotty","rmarkdown","kableExtra","devtools"))
+check.packages(c("knitr","ggplot2", "tidymodels", "MLDataR", "stringi", "dplyr", "tidyr","data.table","ConfusionTableR","OddsPlotty","rmarkdown","kableExtra","devtools","summarytools"))
 ```
 
 ## R Markdown
@@ -82,7 +82,12 @@ summary(DFheartdisease)
 
 
 ```
+#otro modo de verlo
 
+
+```{r}
+print(dfSummary(DFheartdisease,graph.magnif = 0.75), method = 'render')
+```
 
 #Queremos ver el numero de casos en cada nivel de las variables
 ``
@@ -130,31 +135,82 @@ DFheartdisease %>%
     kable(align = rep("c", 2))
   
 ```
+```#variable edad
+```{r}
+DFheartdisease %>% 
+    drop_na() %>%
+    group_by(Edad) %>%
+    count() %>% 
+    ungroup() %>%
+    kable(align = rep("c", 2))
+
+
+```
+Vemos los quintiles de la variable edad
+
+```{r}
+quantile(DFheartdisease$Edad,prob=c(0,0.20,0.4,0.6,0.8,1))
+```
+
 
 ##Hay unas cuantas cosas que queremos limpiar. Las variables sexo, resting y angina, las queremos convertir en factor para nuestro modelo de machine learning.
 
 #Quitamos los valores NA's, convertimos a factores las variables sexo, resting_ecg y angina agrupamos la variable de destino en dos niveles, eliminamos y reordenamos variables.
 
+#convertimos la variable edad en factores. Siguiendo los grupos que nos marcan los quintiles.
+#Recodificamos valores numericos como la edad en factores. Para ello, primero vamos a ver cuántos casos tenemos en cada intervalo.
+
+
 ```{r}
-DFheartdisease1<- DFheartdisease %>%
+table(cut(DFheartdisease$Edad, 5))
+
+
+#Recodificamos valores numericos como la edad en factores
+
+DFheartdisease%>%(DFheartdisease$Edad
+%>% cut(Edad, breaks=c(28,45,52,57,62,77), 
+              include.lowest=TRUE)
+```
+
+
+```{r}
+table(DFheartdisease)
+```
+
+
+
+
+```{r}
+
+DFheartdisease2<- DFheartdisease %>%
   mutate(across(where(is.character), as.factor),
-         Sexo = as.factor(Sexo)) %>% 
+        Edad =as.factor(Edad)) %>% 
   # Remove any non complete cases
   na.omit()
-is.factor(DFheartdisease$Sexo)
+is.factor(DFheartdisease2$Edad)
 ```
 #lo mismo para Angina
 # Comprobar que la variable Angina ahora es un factor
 
 ```{r}
 
-is.factor(DFheartdisease$Angina)
+DFheartdisease2<- DFheartdisease %>%
+  mutate(across(where(is.character), as.factor),
+        Angina =as.factor(HeartDisease)) %>% 
+  # Remove any non complete cases
+  na.omit()
+is.factor(DFheartdisease2$Angina)
 ```
 #Comprobar que la variable Resting_ECG es un factor
 
 ```{r}
+DFheartdisease2<- DFheartdisease %>%
+  mutate(across(where(is.character), as.factor),
+        Resting_ECG =as.factor(HeartDisease)) %>% 
+  # Remove any non complete cases
+  na.omit()
+is.factor(DFheartdisease2$Resting_ECG)
 
-is.factor(DFheartdisease$Resting_ECG)
 ```
 #Comprobar que la variable heartdisease es un factor
 
@@ -178,7 +234,7 @@ is.factor(DFheartdisease2$HeartDisease)
 ## También se pueden incluir gráficos:
 ```{r}
 
-plot(DFheartdisease$Sexo,echo=FALSE)
+plot(DFheartdisease2$Edad,echo=FALSE)
 
 ```
 ``
@@ -189,6 +245,12 @@ Nota: El parámetro`echo = FALSE` se añadió para evitar imprimir el código ge
 Para los modelos de machine learning, se recomienda dividir los datos entre datos de entrenamiento y test. También se puede utilizar otros métodos como el "K-Fold Cross Validation"; de todos modos, para este ejercicio seguiremos con el método de división tradicional.
 
 Para conseguir esto, y asegurarnos de que los resultados son repetibles, utilizaremos "set.seed(123) value" – que esencialmente nos dice que estamos dividiendo los datos de manera aleatoria, y nos aseguramos de que el patrón aleatorio es el mismo que el tutorial, es decir que da la misma división que esta publicación.
+
+vamos a quitar todos los NA del modelo antes de aplicar ML modelo.
+
+```{r}
+DF3<-DFheartdisease2[complete.cases(DFheartdisease2),]
+```
 
 
 ```{r}
@@ -226,6 +288,13 @@ lr_hd_fit <- logistic_reg() %>%
   set_engine("glm") %>% 
   set_mode("classification") %>% 
   fit(DFheartdisease2$HeartDisease ~ ., data = training)
+```
+
+
+```{r}
+fit(., DFheartdisease2$HeartDisease ~ ., data = training)
+
+
 ```
 
 Si queremos ver los resultados resumidos de nuestro modelo de forma ordenada (es decir, un marco de datos con nombres de columna estándar), podemos usar la función tidy():
@@ -376,4 +445,3 @@ hd_long_fact_tbl %>%
          values = c("#fde725ff", "#20a486ff"),
          name   = "Heart\nDisease",
          labels = c("No HD", "Yes HD"))
-
