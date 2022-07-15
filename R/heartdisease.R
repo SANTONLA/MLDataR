@@ -163,13 +163,34 @@ quantile(DFheartdisease$Edad,prob=c(0,0.20,0.4,0.6,0.8,1))
 
 ```{r}
 table(cut(DFheartdisease$Edad, 5))
-
-
 #Recodificamos valores numericos como la edad en factores
 
-DFheartdisease%>%(DFheartdisease$Edad
-%>% cut(Edad, breaks=c(28,45,52,57,62,77), 
-              include.lowest=TRUE)
+```
+#reetiquetamos los diferentes grupos
+
+```{r}
+DFheartdisease4 <-DFheartdisease  %>%
+  select(Sexo,
+         Resting_ECG,
+         Angina,
+         Edad) %>%
+  mutate(Sexo = recode_factor(Sexo, `0` = "mujer", 
+                                  `1` = "hombre" ),
+         Resting_ECG = recode_factor(Resting_ECG,
+         `0` = "normal",
+         `1`="ST-Tabnormality",
+         `2`="LVhypertrophy"),'
+        Angina=recode_factor(Angina,
+        `N`="NO",
+        `Y`="Si",
+        Edad=recode_factor(Edad,
+                           (28,37.8]='De 28 a 37" 
+                           (37.8,47.6]= "De 38 a 47"
+                           (47.6,57.4]= "De 48 a 57"
+                           (57.4,67.2]="De 58 a 67"
+                           (67.2,77]= "De 68 a 77"
+                           )
+gather(key = "key", value = "value", Diagnosis_Heart_Disease)
 ```
 
 
@@ -312,16 +333,16 @@ HDgrantabla <-DFheartdisease  %>%
   select(Sexo,
          Resting_ECG,
          Angina) %>%
-  mutate(Sexo = recode_factor(Sex, `0` = "female", 
-                                  `1` = "male" ),
+  mutate(Sexo = recode_factor(Sexo, `0` = "mujer", 
+                                  `1` = "hombre" ),
          Resting_ECG = recode_factor(Resting_ECG,
          `0` = "normal",
          `1`="ST-Tabnormality",
          `2`="LVhypertrophy"),
         Angina=recode_factor(Angina,
         `N`="NO",
-        `Y`="Yes")
-gather(key = "key", value = "value", -Diagnosis_Heart_Disease)
+        `Y`="Si",
+gather(key = "key", value = "value", Diagnosis_Heart_Disease)
 ```
 
 #Visualize with bar plot
@@ -445,3 +466,4 @@ hd_long_fact_tbl %>%
          values = c("#fde725ff", "#20a486ff"),
          name   = "Heart\nDisease",
          labels = c("No HD", "Yes HD"))
+
