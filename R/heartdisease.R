@@ -1,4 +1,4 @@
-----
+---
 Título: "Detección anomalías cardiacas"
 Autor: "Silvia Antón"
 Fecha: "`r Sys.Date()`"
@@ -16,7 +16,6 @@ check.packages <- function(pkg){
 
 check.packages(c("knitr","ggplot2", "tidymodels", "MLDataR", "stringi", "dplyr", "tidyr","data.table","ConfusionTableR","OddsPlotty","rmarkdown","kableExtra","devtools","summarytools"))
 ```
-
 ## R Markdown
 
 Esto es un documento de Markdown. Markdown es una sintáxis de formato simple para crear documentosHTML, PDF, and MS Word documents. PAra más detalles consulte <http://rmarkdown.rstudio.com>.
@@ -91,16 +90,6 @@ print(dfSummary(DFheartdisease,graph.magnif = 0.75), method = 'render')
 
 #Queremos ver el numero de casos en cada nivel de las variables
 ``
-
-```{r}
-DFheartdisease %>% 
-  drop_na() %>%
-  group_by(HeartDisease) %>%
-  count() %>% 
-  ungroup() %>%
-  kable(align = rep("c", 2))
-```
-
 #variable sexo
 ```{r}
 DFheartdisease %>% 
@@ -146,11 +135,7 @@ DFheartdisease %>%
 
 
 ```
-Vemos los quintiles de la variable edad
 
-```{r}
-quantile(DFheartdisease$Edad,prob=c(0,0.20,0.4,0.6,0.8,1))
-```
 
 
 ##Hay unas cuantas cosas que queremos limpiar. Las variables sexo, resting y angina, las queremos convertir en factor para nuestro modelo de machine learning.
@@ -162,60 +147,68 @@ quantile(DFheartdisease$Edad,prob=c(0,0.20,0.4,0.6,0.8,1))
 
 
 ```{r}
-table(cut(DFheartdisease$Edad, 5))
-#Recodificamos valores numericos como la edad en factores
+DF<-DFheartdisease%>% mutate(fct_Edad = cut(Edad, 
+                        breaks = quantile(Edad, prob=c(0,0.20,0.4,0.6,0.8,1)), 
+                        include.lowest = TRUE)
+  )
 
+class(as.data.frame(DF))
 ```
-#reetiquetamos los diferentes grupos
+#Identificamos los distintos grupos de edad:
 
 ```{r}
-DFheartdisease4 <-DFheartdisease  %>%
+
+DF%>% 
+  group_by(fct_Edad) %>%
+  count() %>% 
+  ungroup() %>%
+  kable(align = rep("c", 2)) %>% kable_styling("full_width" = F)
+```
+
+
+```{r}
+DF %>% glimpse()
+```
+
+```{r}
+#reetiquetamos los diferentes grupos
+
+DF %>%
   select(Sexo,
          Resting_ECG,
          Angina,
-         Edad) %>%
+                everything()) %>%
   mutate(Sexo = recode_factor(Sexo, `0` = "mujer", 
                                   `1` = "hombre" ),
          Resting_ECG = recode_factor(Resting_ECG,
          `0` = "normal",
          `1`="ST-Tabnormality",
-         `2`="LVhypertrophy"),'
-        Angina=recode_factor(Angina,
+         `2`="LVhypertrophy"),
+         Angina=recode_factor(Angina,
         `N`="NO",
-        `Y`="Si",
-        Edad=recode_factor(Edad,
-                           (28,37.8]='De 28 a 37" 
-                           (37.8,47.6]= "De 38 a 47"
-                           (47.6,57.4]= "De 48 a 57"
-                           (57.4,67.2]="De 58 a 67"
-                           (67.2,77]= "De 68 a 77"
-                           )
-gather(key = "key", value = "value", Diagnosis_Heart_Disease)
+        `Y`="Yes"))
+ 
+        
+      
 ```
 
 
-```{r}
-table(DFheartdisease)
-```
 
 
 
 
 ```{r}
 
-DFheartdisease2<- DFheartdisease %>%
-  mutate(across(where(is.character), as.factor),
-        Edad =as.factor(Edad)) %>% 
   # Remove any non complete cases
-  na.omit()
-is.factor(DFheartdisease2$Edad)
+  na.omit(DF)
+
 ```
 #lo mismo para Angina
 # Comprobar que la variable Angina ahora es un factor
 
 ```{r}
 
-DFheartdisease2<- DFheartdisease %>%
+DF<- DF %>%
   mutate(across(where(is.character), as.factor),
         Angina =as.factor(HeartDisease)) %>% 
   # Remove any non complete cases
@@ -225,7 +218,7 @@ is.factor(DFheartdisease2$Angina)
 #Comprobar que la variable Resting_ECG es un factor
 
 ```{r}
-DFheartdisease2<- DFheartdisease %>%
+DF<- DF%>%
   mutate(across(where(is.character), as.factor),
         Resting_ECG =as.factor(HeartDisease)) %>% 
   # Remove any non complete cases
@@ -233,45 +226,60 @@ DFheartdisease2<- DFheartdisease %>%
 is.factor(DFheartdisease2$Resting_ECG)
 
 ```
-#Comprobar que la variable heartdisease es un factor
-
-```{r}
-
-DFheartdisease2<- DFheartdisease %>%
-  mutate(across(where(is.character), as.factor),
-        HeartDisease =as.factor(HeartDisease)) %>% 
-  # Remove any non complete cases
-  na.omit()
-is.factor(DFheartdisease2$HeartDisease)
-```
 
 #Glimpse data
 
 ```{r}
 
-  glimpse(DFheartdisease2)
-```
+ str(DF)
 
-## También se pueden incluir gráficos:
+#Visualizamos las variables con un grafico de barras
+
+
+
+#Must gather() data first in order to facet wrap by key 
+
+```
 ```{r}
 
-plot(DFheartdisease2$Edad,echo=FALSE)
+DF  %>%
+  select(Colesterol,
+         Fasting_BS,
+         Resting_ECG,
+         Angina,
+         HeartDisease,
+         fct_Edad) %>% 
+  gather(key   = "key", 
+         value = "value",
+         HeartDisease)
+```
+#visualizamos la media de colesterol por grupo de edad
+
+```{r}
+set.seed(123)
+tapply(DF$Colesterol,DF$fct_Edad,summary)
+```
+
+
+#Visualize numeric variables as boxplots
+```{r}
+library(ggplot2)
+
+ggplot(data=DF,aes(x=fct_Edad,Y=mean(Colesterol),fill=fct_Edad))+geom_boxplot()+
+  scale_fill_manual(breaks = DF$fct_Edad,
+                    values = c("#1b98e0", "#353436", "yellow", "red", "green"))+
+  labs(x="Grupo de Edad",y="Valor Medio colesterol",title="Colesterol por grupos de Edad")
+
 
 ```
-``
 
 Nota: El parámetro`echo = FALSE` se añadió para evitar imprimir el código generado con el gráfico.
 
 
 Para los modelos de machine learning, se recomienda dividir los datos entre datos de entrenamiento y test. También se puede utilizar otros métodos como el "K-Fold Cross Validation"; de todos modos, para este ejercicio seguiremos con el método de división tradicional.
 
-Para conseguir esto, y asegurarnos de que los resultados son repetibles, utilizaremos "set.seed(123) value" – que esencialmente nos dice que estamos dividiendo los datos de manera aleatoria, y nos aseguramos de que el patrón aleatorio es el mismo que el tutorial, es decir que da la misma división que esta publicación.
+Para conseguir esto, y asegurarnos de que los resultados son repetibles, utilizaremos "set.seed(123) value" – que esencialmente nos dice que estamos dividiendo los datos de manera aleatoria, y nos aseguramos de que el patrón aleatorio es el mismo que el tutorial, es decir que da la misma división que esta publicación
 
-vamos a quitar todos los NA del modelo antes de aplicar ML modelo.
-
-```{r}
-DF3<-DFheartdisease2[complete.cases(DFheartdisease2),]
-```
 
 
 ```{r}
@@ -281,7 +289,10 @@ testing_prop <- 1 - split_prop
 split <- rsample::initial_split(hd, prop = split_prop)
 training <- rsample::training(split)
 testing <- rsample::testing(split)
+```
+
 # Print a custom message to show the samples involved
+```{r}
 training_message <- function() {
   message(
     cat(
@@ -299,21 +310,20 @@ training_message <- function() {
   )
 }
 training_message()
-## The training set has: 734 examples and the testing set has:184.
-## This split has 80% in the training set and 20% in the testing set.
-## 
 ```
-Podemos ajustar un modelo de parsnip al conjunto de entrenamiento y luego podemos evaluar el rendimiento.
+```
+#Podemos ajustar un modelo de parsnip al conjunto de entrenamiento y luego podemos evaluar el rendimiento.
+
+
 ```{r}
+logistic_reg() %>% set_engine("glm") %>% set_mode("classification") %>% 
+fit(DF$HeartDisease ~ ., data = training)
 lr_hd_fit <- logistic_reg() %>%
   set_engine("glm") %>% 
   set_mode("classification") %>% 
-  fit(DFheartdisease2$HeartDisease ~ ., data = training)
-```
+  fit(DF$HeartDisease  ~ ., data = training)
 
-
-```{r}
-fit(., DFheartdisease2$HeartDisease ~ ., data = training)
+fit(., DF3$HeartDisease ~ ., data = training)
 
 
 ```
